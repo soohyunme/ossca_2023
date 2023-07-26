@@ -1,10 +1,11 @@
+import io
+
 import joblib
 import numpy as np
 import tensorflow as tf
-from tensorflow import keras
 from flask import Flask, jsonify, request
 from PIL import Image
-import io
+from tensorflow import keras
 
 app = Flask(__name__)
 study_pred_model = joblib.load("./regression_model.pkl")
