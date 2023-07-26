@@ -1,10 +1,14 @@
 import joblib
 import numpy as np
+import tensorflow as tf
+from tensorflow import keras
 from flask import Flask, jsonify, request
 from PIL import Image
+import io
 
 app = Flask(__name__)
 study_pred_model = joblib.load("./regression_model.pkl")
+cat_dog_model = tf.keras.models.load_model("./cat_dog_model.h5")
 
 
 @app.route("/")
@@ -41,7 +45,21 @@ def inference_study():
     # Predict sample data - 7
     X_sample = np.array([11]).reshape(-1, 1)
     y_sample_pred = study_pred_model.predict(X_sample)
-    return {"score" : int(y_sample_pred)}
+    return {"score": int(y_sample_pred)}
+
+
+@app.route("/predict_catdog", methods=["POST"])
+def inference_catdog():
+    file = request.files["file"]
+    img = keras.utils.load_img(io.BytesIO(file.read()), target_size=(180, 180))
+    img_array = keras.utils.img_to_array(img)
+    img_array = tf.expand_dims(img_array, 0)
+
+    predictions = cat_dog_model.predict(img_array)
+    score = float(predictions[0])
+    image_class = "cat" if score < 0.5 else "dog"
+
+    return jsonify({"predict_result": image_class})
 
 
 if __name__ == "__main__":
