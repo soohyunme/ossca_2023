@@ -1,4 +1,5 @@
 import joblib
+import numpy as np
 from flask import Flask, jsonify, request
 from PIL import Image
 
@@ -35,13 +36,12 @@ def upload_image():
 
 
 # chapter 7 todo 4
-@app.route("/upload_image", methods=["POST"])
+@app.route("/predict_score")
 def inference_study():
-    # # Predict sample data - 7
-    # X_sample = np.array([12, 14]).reshape(-1, 1)
-    # y_sample_pred = study_pred_model.predict(X_sample)
-
-    return 0
+    # Predict sample data - 7
+    X_sample = np.array([11]).reshape(-1, 1)
+    y_sample_pred = study_pred_model.predict(X_sample)
+    return {"score" : int(y_sample_pred)}
 
 
 if __name__ == "__main__":
