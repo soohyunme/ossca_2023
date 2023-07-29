@@ -49,6 +49,7 @@ def inference_study():
     return {"score": int(y_sample_pred)}
 
 
+# chapter 7 todo 5
 @app.route("/predict_catdog", methods=["POST"])
 def inference_catdog():
     file = request.files["file"]
