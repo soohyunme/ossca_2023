@@ -55,4 +55,3 @@ y_sample_pred = loaded_model.predict(X_sample)
 
 for X, pred in zip(X_sample, y_sample_pred):
     print(f"Study for {X.item()} hours, prediction score : {int(pred.item())}")
-
