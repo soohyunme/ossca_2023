@@ -20,7 +20,7 @@ def index():
 # http://localhost:5000/hello - 2
 @app.route("/hello")
 def hello():
-    return "Hello World"
+    return "Hi World"
 
 
 # In postman -> [POST] http://localhost:5000/echo
