@@ -44,7 +44,8 @@ def upload_image():
 @app.route("/predict_score")
 def inference_study():
     # Predict sample data - 7
-    X_sample = np.array([11]).reshape(-1, 1)
+    hours = int(request.args.get("hours"))
+    X_sample = np.array(hours).reshape(-1, 1)
     y_sample_pred = study_pred_model.predict(X_sample)
     return {"score": int(y_sample_pred)}
 
