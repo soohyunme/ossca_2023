@@ -1,0 +1,6 @@
+joblib
+numpy
+tensorflow
+flask 
+pillow
+scikit-learn
