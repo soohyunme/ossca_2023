@@ -6,6 +6,12 @@ on:
     pull_request:
       branches: [ "main" ]
 
+env:
+  REGISTRY_NAME: sooregi
+  CLUSTER_NAME: sooaks
+  CLUSTER_RESOURCE_GROUP: MC_soo-rg_sooaks_koreacentral
+  NAMESPACE: default
+
 jobs:
     build:
         runs-on: ubuntu-latest
@@ -29,6 +35,26 @@ jobs:
             docker build . -t ${{ secrets.REGISTRY_LOGIN_SERVER }}/flaskapp:${{ github.sha }}
             docker push ${{ secrets.REGISTRY_LOGIN_SERVER }}/flaskapp:${{ github.sha }}
 
+        - name: 'Set AKS cluster'
+          uses: azure/aks-set-context@v1
+          with:
+            creds: '${{ secrets.AZURE_CREDENTIALS }}'
+            cluster-name: ${{ env.CLUSTER_NAME }}
+            resource-group: ${{ env.CLUSTER_RESOURCE_GROUP }}
+        
+        # Create namespace if doesn't exist
+        - run: |
+            kubectl create namespace ${{ env.NAMESPACE }} --dry-run -o json | kubectl apply -f -
+
+        # Create imagepullsecret for Azure Container registry (ACR)
+        - uses: azure/k8s-create-secret@v1
+          with:
+            container-registry-url: ${{ env.REGISTRY_NAME }}.azurecr.io
+            container-registry-username: ${{ secrets.REGISTRY_USERNAME }}
+            container-registry-password: ${{ secrets.REGISTRY_PASSWORD }}
+            secret-name: ${{ env.REGISTRY_NAME }}-registry-connection
+            namespace: ${{ env.NAMESPACE }}
+
     deploy:
         needs: build
         runs-on: ubuntu-latest
@@ -50,3 +76,13 @@ jobs:
             registry-password: ${{ secrets.REGISTRY_PASSWORD }}
             name: test-flask-app
             location: 'korea central'
+        - name: 'Deploy to AKS'
+          uses: Azure/k8s-deploy@v4.9
+          with:
+            manifests: |
+              manifests/azure-vote-all-in-one-redis.yaml
+            images: |
+              ${{ secrets.REGISTRY_LOGIN_SERVER }}/flaskapp:${{ github.sha }}
+            imagepullsecrets: |
+              ${{ env.REGISTRY_NAME }}-registry-connection
+            namespace: ${{ env.NAMESPACE }}
