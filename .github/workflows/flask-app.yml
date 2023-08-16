@@ -9,7 +9,7 @@ on:
 env:
   REGISTRY_NAME: sooregi
   CLUSTER_NAME: sooaks
-  CLUSTER_RESOURCE_GROUP: MC_soo-rg_sooaks_koreacentral
+  CLUSTER_RESOURCE_GROUP: soo-rg
   NAMESPACE: default
 
 jobs:
