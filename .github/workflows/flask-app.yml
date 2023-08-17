@@ -60,6 +60,11 @@ jobs:
         - run: |
             kubectl create namespace ${{ env.NAMESPACE }} --dry-run -o json | kubectl apply -f -
 
+        - name: 'Set K8s context'
+          uses: azure/k8s-set-context@v1
+          with:
+            kubeconfig: ${{ secrets.KUBE_CONFIG }}
+
         # Create imagepullsecret for Azure Container registry (ACR)
         - uses: azure/k8s-create-secret@v1
           with:
@@ -81,17 +86,13 @@ jobs:
             name: test-flask-app
             location: 'korea central'
 
-        # - name: 'Deploy to AKS'
-        #   uses: Azure/k8s-deploy@v4.9
-        #   with:
-        #     manifests: |
-        #       manifests/flask-app.yaml
-        #     images: |
-        #       ${{ secrets.REGISTRY_LOGIN_SERVER }}/flaskapp:${{ github.sha }}
-        #     imagepullsecrets: |
-        #       ${{ env.REGISTRY_NAME }}-registry-connection
-        #     namespace: ${{ env.NAMESPACE }}
-
-        - uses: azure/k8s-set-context@v1
+        - name: 'Deploy to AKS'
+          uses: Azure/k8s-deploy@v4.9
           with:
-            kubeconfig: ${{ secrets.KUBE_CONFIG }}
+            manifests: |
+              manifests/flask-app.yaml
+            images: |
+              ${{ secrets.REGISTRY_LOGIN_SERVER }}/flaskapp:${{ github.sha }}
+            imagepullsecrets: |
+              ${{ env.REGISTRY_NAME }}-registry-connection
+            namespace: ${{ env.NAMESPACE }}
