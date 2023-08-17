@@ -81,13 +81,17 @@ jobs:
             name: test-flask-app
             location: 'korea central'
 
-        - name: 'Deploy to AKS'
-          uses: Azure/k8s-deploy@v4.9
+        # - name: 'Deploy to AKS'
+        #   uses: Azure/k8s-deploy@v4.9
+        #   with:
+        #     manifests: |
+        #       manifests/flask-app.yaml
+        #     images: |
+        #       ${{ secrets.REGISTRY_LOGIN_SERVER }}/flaskapp:${{ github.sha }}
+        #     imagepullsecrets: |
+        #       ${{ env.REGISTRY_NAME }}-registry-connection
+        #     namespace: ${{ env.NAMESPACE }}
+
+        - uses: azure/k8s-set-context@v1
           with:
-            manifests: |
-              manifests/flask-app.yaml
-            images: |
-              ${{ secrets.REGISTRY_LOGIN_SERVER }}/flaskapp:${{ github.sha }}
-            imagepullsecrets: |
-              ${{ env.REGISTRY_NAME }}-registry-connection
-            namespace: ${{ env.NAMESPACE }}
+            kubeconfig: ${{ secrets.KUBE_CONFIG }}
