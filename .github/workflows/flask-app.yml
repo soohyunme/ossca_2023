@@ -35,6 +35,20 @@ jobs:
             docker build . -t ${{ secrets.REGISTRY_LOGIN_SERVER }}/flaskapp:${{ github.sha }}
             docker push ${{ secrets.REGISTRY_LOGIN_SERVER }}/flaskapp:${{ github.sha }}
 
+    deploy:
+        needs: build
+        runs-on: ubuntu-latest
+        environment: production
+        steps:
+        # checkout the repo
+        - name: 'Checkout GitHub Action'
+          uses: actions/checkout@main
+
+        - name: 'Login via Azure CLI'
+          uses: azure/login@v1
+          with:
+            creds: ${{ secrets.AZURE_CREDENTIALS }}
+
         - name: 'Set AKS cluster'
           uses: azure/aks-set-context@v1
           with:
@@ -55,20 +69,6 @@ jobs:
             secret-name: ${{ env.REGISTRY_NAME }}-registry-connection
             namespace: ${{ env.NAMESPACE }}
 
-    deploy:
-        needs: build
-        runs-on: ubuntu-latest
-        environment: production
-        steps:
-        # checkout the repo
-        - name: 'Checkout GitHub Action'
-          uses: actions/checkout@main
-
-        - name: 'Login via Azure CLI'
-          uses: azure/login@v1
-          with:
-            creds: ${{ secrets.AZURE_CREDENTIALS }}
-
         - name: 'Deploy to Azure Container Instances'
           uses: 'azure/aci-deploy@v1'
           with:
@@ -80,6 +80,7 @@ jobs:
             registry-password: ${{ secrets.REGISTRY_PASSWORD }}
             name: test-flask-app
             location: 'korea central'
+
         - name: 'Deploy to AKS'
           uses: Azure/k8s-deploy@v4.9
           with:
