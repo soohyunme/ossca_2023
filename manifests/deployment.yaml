@@ -14,6 +14,6 @@ spec:
     spec:
       containers:
         - name: test-flask-app
-          image: ${{ env.REGISTRY_NAME }}.azurecr.io/flaskapp:${{ github.sha }}
+          image: sooregi.azurecr.io/flaskapp:latest
           ports:
             - containerPort: 5000
