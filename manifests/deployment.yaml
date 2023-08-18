@@ -1,19 +1,19 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: aks-flask-app
+  name: test-flask-app
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: aks-flask-app
+      app: test-flask-app
   template:
     metadata:
       labels:
-        app: aks-flask-app
+        app: test-flask-app
     spec:
       containers:
-        - name: aks-flask-app
+        - name: test-flask-app
           image: ${{ env.REGISTRY_NAME }}.azurecr.io/flaskapp:${{ github.sha }}
           ports:
             - containerPort: 5000
