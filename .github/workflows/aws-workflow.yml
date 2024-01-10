@@ -14,13 +14,24 @@ jobs:
     - name: Checkout Repository
       uses: actions/checkout@v2
 
-    - name: Login to Amazon ECR
-      run: echo ${{ secrets.AWS_ACCESS_KEY_ID }} ${{ secrets.AWS_SECRET_ACCESS_KEY }} | aws --region ${{ secrets.AWS_REGION }} ecr get-login-password | docker login --username AWS --password-stdin ${{ secrets.ECR_REGISTRY }}
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v1
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: ${{ env.AWS_REGION }}
 
     - name: Build and Push Docker Image
       run: |
         docker build -t ${{ secrets.ECR_REGISTRY }}/${{ secrets.ECR_REPO_NAME }}:latest .
         docker push ${{ secrets.ECR_REGISTRY }}/${{ secrets.ECR_REPO_NAME }}:latest
+    - name: Login to Amazon ECR
+      run: >
+        echo ${{ secrets.AWS_ACCESS_KEY_ID }} ${{ secrets.AWS_SECRET_ACCESS_KEY }} |
+        aws --region ${{ secrets.AWS_REGION }} configure set aws_access_key_id "" --profile ecr-login &&
+        aws --region ${{ secrets.AWS_REGION }} configure set aws_secret_access_key "" --profile ecr-login &&
+        aws --region ${{ secrets.AWS_REGION }} ecr get-login-password --profile ecr-login | docker login --username AWS --password-stdin ${{ secrets.ECR_REGISTRY }}
+
 
     - name: SSH into EC2 and Deploy
       uses: appleboy/ssh-action@master
